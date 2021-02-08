@@ -1,0 +1,10 @@
+spring:
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+  data:
+    elasticsearch:
+      repositories:
+        enabled:
