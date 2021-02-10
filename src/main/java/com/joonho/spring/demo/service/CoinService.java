@@ -7,6 +7,7 @@ import com.joonho.spring.demo.model.CoinRepository;
 import com.joonho.spring.demo.model.CoinType;
 import com.joonho.spring.demo.model.CurrencyType;
 import org.apache.tomcat.util.json.JSONParser;
+import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.configurationprocessor.json.JSONArray;
@@ -27,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -50,41 +50,27 @@ public class CoinService {
         HttpHeaders header = new HttpHeaders();
         HttpEntity<?> entity = new HttpEntity<>(header);
 
-        ResponseEntity resultMap = restTemplate.exchange(coinPriceApiConfig.getBitcoin(), HttpMethod.GET, entity, String.class);
+        ResponseEntity resultMap = restTemplate.exchange(coinPriceApiConfig.getURL(coinId), HttpMethod.GET, entity, String.class);
 
         try {
-            JSONArray jsonArray = new JSONArray(resultMap.getBody().toString());
-            JSONObject jsonObject = (JSONObject) jsonArray.get(0);
+            JSONObject jsonObject = new JSONObject(resultMap.getBody().toString());
 
             Coin coin = new Coin();
-            coin.setCoin_id(CoinType.valueOf((String) jsonObject.get("id")));
+
+            coin.setCoin_id(CoinType.valueOf(coinId));
             coin.setId(UUID.randomUUID().toString());
-            coin.setPrice(Double.parseDouble((String) jsonObject.get("price")));
-            LocalDateTime temp = LocalDateTime.parse(((String)jsonObject.get("price_date")), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"));
-
-            coin.setTimestamp(temp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")));
+            coin.setPrice(Double.parseDouble((String) jsonObject.get("lprice")));
+            coin.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")));
             coin.setCurrency(CurrencyType.USD);
-
-            System.out.println(coin);
 
             IndexCoordinates indexCoordinates = elasticsearchOperations.getIndexCoordinatesFor(Coin.class);
             IndexQuery indexQuery = new IndexQueryBuilder()
-                    //.withId(UUID.randomUUID().toString())
                     .withObject(coin)
                     .build();
 
-//            elasticsearchOperations.index()
             String documentId = elasticsearchOperations.index(indexQuery, indexCoordinates);
             return documentId;
-         /*   Coin coin = new Coin();
-            coin.setCoin(CoinType.valueOf((String) jsonObject.get("id")));
-            coin.setPrice((Double) jsonObject.get("price"));
-            coin.setTimestamp((Date) jsonObject.get("price_date"));
-            coin.setCurrency(CurrencyType.KRW);
 
-            coinRepository.save(coin);*/
-
-           // return resultMap.getBody().toString();
         } catch (JSONException e) {
             e.printStackTrace();
         }

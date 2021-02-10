@@ -18,4 +18,19 @@ public class CoinPriceApiConfig {
 
     @Value("${ripple}")
     private String ripple;
+
+    public String getURL(String coinId) {
+        switch (coinId) {
+            case "BTC":
+                return bitcoin;
+
+            case "ETH":
+                return ethereum;
+
+            case "XRP":
+                return ripple;
+        }
+
+        return bitcoin;
+    }
 }
