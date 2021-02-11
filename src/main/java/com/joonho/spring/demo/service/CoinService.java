@@ -60,7 +60,8 @@ public class CoinService {
             coin.setCoin_id(CoinType.valueOf(coinId));
             coin.setId(UUID.randomUUID().toString());
             coin.setPrice(Double.parseDouble((String) jsonObject.get("lprice")));
-            coin.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")));
+            //coin.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")));
+            coin.setTimestamp(new Date());
             coin.setCurrency(CurrencyType.USD);
 
             IndexCoordinates indexCoordinates = elasticsearchOperations.getIndexCoordinatesFor(Coin.class);

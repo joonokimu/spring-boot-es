@@ -28,7 +28,7 @@ public class Coin {
     private CurrencyType currency;
     //private String currency;
 
-    private String timestamp;
+    private Date timestamp;
 
     private String comment;
 }
